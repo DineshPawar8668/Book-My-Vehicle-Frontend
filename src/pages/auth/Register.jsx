@@ -1,25 +1,34 @@
 import React, { useState } from "react";
-import { Container, Form, Button, Card } from "react-bootstrap";
+import { Container, Form, Button, Card, Row, Col } from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "./../../redux/slices/authSlice";
+import { isValidNumber } from "./../../utils/validations";
 
 function Register() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    mobileNo: "",
     password: "",
     confirmPassword: "",
+    role: "User",
   });
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleRegister = () => {
-    console.log("Register details:", form);
+    dispatch(registerUser(form, navigate));
   };
 
   return (
     <Container className="d-flex justify-content-center align-items-center vh-100">
-      <Card style={{ width: "28rem", padding: "20px" }}>
+      <Card style={{ width: "35rem", padding: "20px" }}>
         <h3 className="text-center">Create an Account</h3>
         <p className="text-center text-muted">
           Fill in the details below to get started.
@@ -27,50 +36,87 @@ function Register() {
         <hr />
 
         <Form>
-          <Form.Group controlId="name">
-            <Form.Label>Full Name</Form.Label>
-            <Form.Control
-              type="text"
-              name="name"
-              placeholder="Enter your full name"
-              value={form.name}
-              onChange={handleChange}
-            />
-          </Form.Group>
+          <Row>
+            {/* Full Name */}
+            <Col md={6}>
+              <Form.Group controlId="name">
+                <Form.Label>Full Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  placeholder="Enter your full name"
+                  value={form.name}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+            </Col>
 
-          <Form.Group controlId="email" className="mt-3">
-            <Form.Label>Email Address</Form.Label>
-            <Form.Control
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={form.email}
-              onChange={handleChange}
-            />
-          </Form.Group>
+            {/* Email Address */}
+            <Col md={6}>
+              <Form.Group controlId="email">
+                <Form.Label>Email Address</Form.Label>
+                <Form.Control
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email"
+                  value={form.email}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
 
-          <Form.Group controlId="password" className="mt-3">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              value={form.password}
-              onChange={handleChange}
-            />
-          </Form.Group>
+          <Row className="mt-3">
+            {/* Mobile Number */}
+            <Col md={6}>
+              <Form.Group controlId="mobileNo">
+                <Form.Label>Mobile No</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="mobileNo"
+                  placeholder="Enter your mobile number"
+                  maxLength={10}
+                  value={form.mobileNo}
+                  onChange={(e) =>
+                    isValidNumber(e.target.value) && handleChange(e)
+                  }
+                />
+              </Form.Group>
+            </Col>
 
-          <Form.Group controlId="confirmPassword" className="mt-3">
-            <Form.Label>Confirm Password</Form.Label>
-            <Form.Control
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm your password"
-              value={form.confirmPassword}
-              onChange={handleChange}
-            />
-          </Form.Group>
+            {/* Role Selection */}
+            <Col md={6}>
+              <Form.Group controlId="role">
+                <Form.Label>Select Role</Form.Label>
+                <Form.Select
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                >
+                  <option value="User">User</option>
+                  <option value="Admin">Admin</option>
+                  <option value="VOwner">Vehicle Owner</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
 
+          <Row className="mt-3">
+            {/* Password */}
+            <Col md={6}>
+              <Form.Group controlId="password">
+                <Form.Label>Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  name="password"
+                  placeholder="Enter your password"
+                  value={form.password}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          {/* Register Button */}
           <Button
             variant="primary"
             className="mt-4 w-100"
@@ -79,9 +125,17 @@ function Register() {
             Register
           </Button>
 
+          {/* Login Redirect */}
           <p className="text-center mt-3">
             Already have an account?{" "}
-            <a href="#login" className="fw-bold text-decoration-none">
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/login");
+              }}
+              className="fw-bold text-decoration-none"
+            >
               Login here
             </a>
           </p>

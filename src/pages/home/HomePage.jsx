@@ -1,55 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Card, Button } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserData } from "../../redux/slices/userSlice";
+import { getVehiclelist } from "../../redux/slices/vehicleSlice";
+import car1 from "../../assets/car1.jpg";
+import Spinner from "../../components/Spinner";
+import Testimonial from "../../components/Testimonial"; // ✅ Import Testimonial Component
 
 function HomePage() {
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
 
-  const handleLocationChange = (event) => {
-    setLocation(event.target.value);
-  };
+  const dispatch = useDispatch();
+  const { vehicleList, loading } = useSelector((state) => state.vehicle);
 
-  const handleCategoryChange = (event) => {
-    setCategory(event.target.value);
-  };
+  useEffect(() => {
+    dispatch(getUserData());
+    if (!vehicleList?.length) {
+      dispatch(getVehiclelist());
+    }
+  }, [dispatch]);
+
+  const handleLocationChange = (event) => setLocation(event.target.value);
+  const handleCategoryChange = (event) => setCategory(event.target.value);
 
   const categories = ["Sedan", "SUV", "Hatchback", "Truck"];
   const locations = ["New York", "Los Angeles", "Chicago", "Houston"];
 
-  // Mock vehicle data
-  const vehicles = [
-    {
-      id: 1,
-      name: "Toyota Camry",
-      type: "Sedan",
-      location: "New York",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 2,
-      name: "Ford Explorer",
-      type: "SUV",
-      location: "Los Angeles",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 3,
-      name: "Honda Civic",
-      type: "Hatchback",
-      location: "Chicago",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 4,
-      name: "Chevrolet Silverado",
-      type: "Truck",
-      location: "Houston",
-      image: "https://via.placeholder.com/150",
-    },
-  ];
-
-  // Filtered vehicles based on selected location and category
-  const filteredVehicles = vehicles.filter(
+  const filteredVehicles = vehicleList?.filter(
     (vehicle) =>
       (location === "" || vehicle.location === location) &&
       (category === "" || vehicle.type === category)
@@ -58,8 +36,8 @@ function HomePage() {
   return (
     <Container className="mt-4">
       {/* Filter Section */}
-      <Row className="mb-4">
-        <Col md={6}>
+      <Row className="mb-2">
+        <Col md={2}>
           <Form.Group>
             <Form.Label>Location:</Form.Label>
             <Form.Select value={location} onChange={handleLocationChange}>
@@ -73,7 +51,7 @@ function HomePage() {
           </Form.Group>
         </Col>
 
-        <Col md={6}>
+        <Col md={2}>
           <Form.Group>
             <Form.Label>Category:</Form.Label>
             <Form.Select value={category} onChange={handleCategoryChange}>
@@ -88,30 +66,58 @@ function HomePage() {
         </Col>
       </Row>
 
-      {/* Vehicle List */}
-      <h3 className="text-center mb-3">Explore Vehicles</h3>
-      <p className="text-center text-muted">
-        Use the filters above to customize your search and explore vehicles available in your selected location and category.
-      </p>
+      {/* Vehicles Section */}
+      <div
+        style={{
+          marginTop: "5vh",
+          padding: "20px",
+          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+          borderRadius: "10px",
+          backgroundColor: "#fff",
+        }}
+      >
+        <h2 className="text-center mb-3">Explore Vehicles</h2>
+        <p className="text-center text-muted">
+          Use the filters above to customize your search and explore vehicles
+          available in your selected location and category.
+        </p>
 
-      <Row>
-        {filteredVehicles.map((vehicle) => (
-          <Col md={3} key={vehicle.id} className="mb-4">
-            <Card>
-              <Card.Img variant="top" src={vehicle.image} height="150" />
-              <Card.Body>
-                <Card.Title>{vehicle.name}</Card.Title>
-                <Card.Text>
-                  {vehicle.type} - {vehicle.location}
-                </Card.Text>
-                <Button variant="primary" className="w-100">
-                  View Details
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+        {loading ? (
+          <Spinner height={"30vh"} />
+        ) : (
+          <Row>
+            {filteredVehicles?.length > 0 ? (
+              filteredVehicles.map((d) => (
+                <Col md={3} key={d._id} className="mb-4">
+                  <Card>
+                    <Card.Img variant="top" src={car1} height="150" />
+                    <Card.Body>
+                      <Card.Title>
+                        {d?.vehicle?.name || "Unknown Vehicle"}
+                      </Card.Title>
+                      <Card.Text>
+                        {d?.vehicle?.type || "-"} - {d?.location || "Unknown"}
+                      </Card.Text>
+                      <Button variant="primary" className="w-100">
+                        View Details
+                      </Button>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))
+            ) : (
+              <div
+                className="text-center"
+                style={{ height: "50vh", marginTop: "7vh" }}
+              >
+                <p>No vehicles available for now.</p>
+              </div>
+            )}
+          </Row>
+        )}
+      </div>
+
+      <Testimonial />
     </Container>
   );
 }

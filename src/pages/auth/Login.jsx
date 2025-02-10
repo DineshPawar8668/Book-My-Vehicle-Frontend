@@ -1,12 +1,18 @@
 import React, { useState } from "react";
 import { Container, Form, Button, Card } from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { loginUser } from "../../redux/slices/authSlice";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("User");
+  const dispatch = useDispatch(0);
+  const navigate = useNavigate(0);
 
   const handleLogin = () => {
-    console.log("Login credentials:", { email, password });
+    dispatch(loginUser({ email, password, role }, navigate));
   };
 
   return (
@@ -37,6 +43,16 @@ function Login() {
             />
           </Form.Group>
 
+          <Form.Group controlId="role" className="mt-3">
+            <Form.Label>Select Role</Form.Label>
+            <Form.Select value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="User">User</option>
+              <option value="Driver">Driver</option>
+              <option value="Admin">Admin</option>
+              <option value="VOwner">Vehicle Owner</option>
+            </Form.Select>
+          </Form.Group>
+
           <Button
             variant="primary"
             className="mt-4 w-100"
@@ -45,17 +61,24 @@ function Login() {
             Login
           </Button>
 
-          <p className="text-center mt-3">
+          {/* <p className="text-center mt-3">
             <a href="#forgot-password" className="text-decoration-none">
               Forgot password?
             </a>
-          </p>
+          </p> */}
 
           <hr />
 
           <p className="text-center">
             New here?{" "}
-            <a href="#signup" className="fw-bold text-decoration-none">
+            <a
+              href=""
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/register");
+              }}
+              className="fw-bold text-decoration-none"
+            >
               Create an account
             </a>
           </p>
